@@ -1,0 +1,14 @@
+stacks:
+  pyats:
+    description: "Devices handled directly through the pyATS MCP server"
+    vendors:
+      - cisco
+  ansible:
+    description: "Devices and services managed by the Ansible MCP server"
+    vendors:
+      - juniper
+      - hpe
+      - meraki
+      - azure
+      - linux
+      - windows
