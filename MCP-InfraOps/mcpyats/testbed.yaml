@@ -1,0 +1,130 @@
+---
+devices:
+  R1:
+    alias: "R1"
+    type: "router"
+    os: "iosxe"
+    platform: csr1000v
+    credentials:
+      default:
+        username: admin
+        password: Z4kcandle123!
+      enable:
+        password: Z4kcandle123!
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.253
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o Ciphers=aes256-ctr -o MACs=hmac-sha2-256 -o PreferredAuthentications=password -o PubkeyAuthentication=no -o KexAlgorithms=diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 -o HostKeyAlgorithms=ssh-rsa"
+  R2:
+    alias: "R2"
+    type: "router"
+    os: "iosxe"
+    platform: csr1000v
+    credentials:
+      default:
+        username: admin
+        password: Z4kcandle123!
+      enable:
+        password: Z4kcandle123!
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.252
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o Ciphers=aes256-ctr -o MACs=hmac-sha2-256 -o PreferredAuthentications=password -o PubkeyAuthentication=no -o KexAlgorithms=diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 -o HostKeyAlgorithms=ssh-rsa"
+  SW1:
+    alias: "SW1"
+    type: "switch"
+    os: "iosxe"
+    platform: CSR1kv
+    credentials:
+      default:
+        username: admin
+        password: Z4kcandle123!
+      enable:
+        password: Z4kcandle123!
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.251
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o Ciphers=aes256-ctr -o MACs=hmac-sha2-256 -o PreferredAuthentications=password -o PubkeyAuthentication=no -o KexAlgorithms=diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 -o HostKeyAlgorithms=ssh-rsa"
+  SW2:
+    alias: "SW2"
+    type: "switch"
+    os: "iosxe"
+    platform: CSR1kv
+    credentials:
+      default:
+        username: admin
+        password: Z4kcandle123!
+      enable:
+        password: Z4kcandle123!
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.250
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o Ciphers=aes256-ctr -o MACs=hmac-sha2-256 -o PreferredAuthentications=password -o PubkeyAuthentication=no -o KexAlgorithms=diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 -o HostKeyAlgorithms=ssh-rsa"
+  WIREGUARD_VM:
+    alias: "Home WireGuard VM"
+    type: "host"
+    os: "linux"
+    platform: ubuntu
+    credentials:
+      default:
+        username: cisconnects  # TODO: Add SSH username
+        password: Z4kcandle123!  # TODO: Add SSH password
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.200  # TODO: Add home network IP (e.g., 192.168.1.x)
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"                 
+  WINDOWS_NUC:
+    alias: "Windows NUC Server"
+    type: "host"
+    os: "windows"
+    platform: windows
+    credentials:
+      default:
+        username: admin
+        password: admin
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.150
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+  JUNOS_VSRX:
+    alias: "Junos vSRX"
+    type: "firewall"
+    os: "junos"
+    platform: vsrx
+    credentials:
+      default:
+        username: zakmeadows
+        password: Z4kcandle123!
+    connections:
+      cli:
+        protocol: ssh
+        ip: 192.168.1.125
+        port: 22
+        arguments:
+          connection_timeout: 360
+          ssh_options: "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o Ciphers=aes256-ctr -o MACs=hmac-sha2-256 -o PreferredAuthentications=password -o PubkeyAuthentication=no -o KexAlgorithms=diffie-hellman-group-exchange-sha1,diffie-hellman-group14-sha1 -o HostKeyAlgorithms=ssh-rsa"
+

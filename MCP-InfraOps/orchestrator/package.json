@@ -1,0 +1,39 @@
+{
+  "name": "mcp-orchestrator",
+  "version": "1.0.0",
+  "description": "MCP Server Orchestrator for Network Infrastructure Automation",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "dotenv": "^16.3.1",
+    "axios": "^1.5.0",
+    "ws": "^8.14.2",
+    "node-cron": "^3.0.2",
+    "winston": "^3.10.0",
+    "joi": "^17.9.2",
+    "redis": "^4.6.8",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.4",
+    "supertest": "^6.3.3"
+  },
+  "keywords": [
+    "mcp",
+    "automation",
+    "network",
+    "infrastructure",
+    "orchestrator"
+  ],
+  "author": "MCP Automation Team",
+  "license": "MIT"
+} 
