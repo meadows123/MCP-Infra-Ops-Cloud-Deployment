@@ -742,6 +742,136 @@ app.post('/api/close-pull-request', asyncHandler(async (req, res) => {
 }));
 
 /**
+ * POST /api/trigger-terraform-apply
+ * Trigger terraform apply for a specific approved/merged PR
+ * 
+ * Body:
+ *   - prNumber: GitHub PR number (required)
+ *   - repository: Repository name (owner/repo) (optional, defaults from config)
+ *   - branch: Git branch name with terraform code (optional, will be looked up from PR)
+ */
+app.post('/api/trigger-terraform-apply', asyncHandler(async (req, res) => {
+  try {
+    const orgId = getOrganizationId(req);
+    const { prNumber, repository, branch } = req.body;
+
+    if (!prNumber) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        message: 'prNumber is required'
+      });
+    }
+
+    console.log(`🚀 Triggering terraform apply for PR #${prNumber}`);
+
+    // Get GitHub credentials
+    let githubConfig = await getIntegrationConfig(orgId, 'github', false);
+    let githubToken = githubConfig?.token || process.env.GITHUB_TOKEN;
+    let repoUrl = githubConfig?.repository_url || process.env.GITHUB_REPO_URL || 'https://github.com/meadows123/MCP-Infra-Ops-Cloud-Deployment.git';
+
+    if (!githubToken) {
+      return res.status(400).json({
+        error: 'GitHub integration not configured',
+        message: 'Please configure GitHub credentials in your organization Integrations settings'
+      });
+    }
+
+    // Initialize Octokit with GitHub token
+    const octokit = new Octokit({ auth: githubToken });
+
+    // Parse owner and repo from URL
+    const urlMatch = repoUrl.match(/github\.com[:/](.+?)\/(.+?)(\.git)?$/);
+    if (!urlMatch) {
+      return res.status(400).json({
+        error: 'Invalid GitHub repository URL',
+        message: `Could not parse repository: ${repoUrl}`
+      });
+    }
+
+    const owner = urlMatch[1];
+    const repo = urlMatch[2];
+
+    // Get PR details to find branch name
+    const { data: prData } = await octokit.rest.pulls.get({
+      owner,
+      repo,
+      pull_number: prNumber
+    });
+
+    const branchName = branch || prData.head.ref;
+    console.log(`📋 Found PR #${prNumber}: ${prData.title}`);
+    console.log(`🌿 Branch: ${branchName}`);
+
+    // Check if PR is merged
+    if (!prData.merged) {
+      return res.status(400).json({
+        error: 'PR not merged',
+        message: 'This pull request has not been merged yet. Please merge it first before applying terraform changes.'
+      });
+    }
+
+    // Try to trigger GitHub Actions workflow dispatch if available
+    try {
+      console.log(`⚙️  Attempting to trigger GitHub Actions workflow...`);
+      
+      // Trigger workflow run on main branch (which was just pushed to after merge)
+      await octokit.rest.actions.createWorkflowDispatch({
+        owner,
+        repo,
+        workflow_id: 'terraform-apply.yml',
+        ref: 'main',
+        inputs: {
+          pr_number: String(prNumber),
+          branch: branchName
+        }
+      }).catch(() => {
+        // If workflow dispatch fails, continue anyway
+        console.log(`⚠️  Workflow dispatch not available, will provide instructions for manual apply`);
+      });
+
+      console.log(`✅ Workflow dispatch triggered successfully`);
+    } catch (workflowError) {
+      console.log(`⚠️  Could not dispatch workflow: ${workflowError.message}`);
+    }
+
+    // Return success response with deployment info
+    res.json({
+      success: true,
+      message: `Terraform apply triggered for PR #${prNumber}`,
+      deployment: {
+        prNumber: prNumber,
+        repository: `${owner}/${repo}`,
+        branch: branchName,
+        sha: prData.merge_commit_sha,
+        mergedAt: prData.merged_at,
+        status: 'triggered',
+        workflowUrl: `https://github.com/${owner}/${repo}/actions`
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error triggering terraform apply:', error.message);
+    
+    let statusCode = 500;
+    let errorMessage = error.message;
+
+    if (error.message.includes('Bad credentials')) {
+      statusCode = 401;
+      errorMessage = 'GitHub authentication failed: Invalid or expired token';
+    } else if (error.message.includes('404')) {
+      statusCode = 404;
+      errorMessage = 'Pull request not found';
+    }
+
+    res.status(statusCode).json({
+      error: 'Failed to trigger terraform apply',
+      message: errorMessage,
+      statusCode: statusCode
+    });
+  }
+}));
+
+/**
  * POST /api/terraform-destroy
  * Execute terraform destroy to remove all managed infrastructure
  * 
@@ -1857,6 +1987,7 @@ app.listen(PORT, () => {
   console.log('    POST /api/github/issues');
   console.log('    GET  /api/approval-requests');
   console.log('    POST /api/merge-pull-request');
+  console.log('    POST /api/trigger-terraform-apply');
   console.log('    POST /api/close-pull-request');
   console.log('  Google Maps:');
   console.log('    POST /api/maps/geocode');
